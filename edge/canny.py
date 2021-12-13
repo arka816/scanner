@@ -2,22 +2,24 @@ import sys
 import numpy as np
 import time
 from filters import gaussian, prewitt, sobel
+from otsu import otsu
 
 
 class Canny:
-    THRESHOLD_HIGH = 0.15
-    THRESHOLD_LOW  = 0.05
+    THRESHOLD_HIGH = 0.3
+    THRESHOLD_LOW  = 0.1
 
     STRONG_VAL = 255
     WEAK_VAL   = 75
 
     HYSTERESIS_KERNEL_SIZE = 5
 
-    def __init__(self, bitmap=None, sd=1, kernel_size=5, edge_op='sobel') -> None:
+    def __init__(self, bitmap=None, sd=1, kernel_size=5, edge_op='sobel', threshold_method='otsu') -> None:
         self.bitmap = bitmap
         self.edge_op = edge_op
         self.sd = sd
         self.kernel_size = kernel_size
+        self.threshold_method = threshold_method
 
     def __call__(self):
         # Step 1:   Gaussian Kernel
@@ -43,6 +45,10 @@ class Canny:
         print('step 3', 'clocked at: ', end - start)
 
         # Step 4:   dual threshold
+        if self.threshold_method == 'otsu':
+            _, self.THRESHOLD_HIGH = otsu(suppressed_image)
+            self.THRESHOLD_HIGH /= suppressed_image.max()
+            self.THRESHOLD_LOW = 0.5 * self.THRESHOLD_HIGH
         start = time.time()
         thresholded_image = self.threshold(suppressed_image)
         end = time.time()
@@ -54,7 +60,7 @@ class Canny:
         end = time.time()
         print('step 5', 'clocked at: ', end - start)
 
-        return hysteresis_image
+        return hysteresis_image.astype(np.uint8)
 
 
 
