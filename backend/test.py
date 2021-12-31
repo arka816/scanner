@@ -1,3 +1,4 @@
+import os
 import sys
 import numpy as np
 sys.path.append('../edge/')
@@ -8,8 +9,11 @@ from contours import ContourDetector
 
 sample = 1
 
-inputfile = f"./input/test{sample}.jpeg"
-outputfile = f"./output/res{sample}.png"
+input_dir = "../test/input/"
+output_dir = "../test/output/"
+
+inputfile = os.path.join(input_dir, f"test{sample}.jpeg")
+outputfile = os.path.join(output_dir, f"res{sample}.png")
 
 image = np.array(cv2.imread(inputfile, cv2.IMREAD_GRAYSCALE))
 canny = Canny(image, sd=1.4, kernel_size=7)
